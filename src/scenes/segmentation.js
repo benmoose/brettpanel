@@ -1,23 +1,23 @@
 import React from "react"
-import { Button, ButtonGroup, Card, Divider, RadioGroup, Radio } from "@blueprintjs/core"
-import { DateRangePicker } from "@blueprintjs/datetime"
 import moment from "moment"
-import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
+import { Button, ButtonGroup, Card, Divider, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
+import { DateRangePicker } from "@blueprintjs/datetime"
 
 import {Page} from "../modules/common/layout"
+import {callSegmentationEndpoint} from "../utils/mixpanel-client"
+
+import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
 export default class Segmentation extends React.Component {
   defaultState = {
     unit: "hour",
+    event: "GO_NEARBY_MODE_SELECTED",
+    segmentationProperty: "mode_id",
     startTime: null,
     endTime: null,
   }
 
-  state = {
-    unit: "hour",
-    startTime: null,
-    endTime: null,
-  }
+  state = {...this.defaultState}
 
   reset = () => {
     this.setState(this.defaultState)
@@ -33,8 +33,8 @@ export default class Segmentation extends React.Component {
   }
 
   isValid = () => {
-    const { unit, startTime, endTime } = this.state
-    return unit && startTime && endTime
+    const { unit, startTime, endTime, event } = this.state
+    return unit && startTime && endTime && event
   }
 
   formatDate = (date) => {
@@ -44,6 +44,10 @@ export default class Segmentation extends React.Component {
   getDateRangeDurationDays = () => {
     const { startTime, endTime } = this.state
     return startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
+  }
+
+  fetchData = () => {
+    console.log("not implemented")
   }
 
   render () {
@@ -72,6 +76,26 @@ export default class Segmentation extends React.Component {
                       <Radio label="Day" value="day" />
                     </RadioGroup>
                   </div>
+
+                  <div className="col-6">
+                    <Label>Event</Label>
+                    <InputGroup
+                      placeholder="e.g. GO_NEARBY_MODE_SELECTED"
+                      value={this.state.event}
+                      onChange={this.handleChange("event")}
+                    />
+                  </div>
+
+                  <div className="col-3">
+                    <RadioGroup
+                      label="Segmentation property"
+                      selectedValue={this.state.segmentationProperty}
+                      onChange={this.handleChange("segmentationProperty")}
+                    >
+                      <Radio label="Mode ID" value="mode_id" />
+                      <Radio label="Request Brand IDs" value="Request Brand IDs" />
+                    </RadioGroup>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -83,7 +107,7 @@ export default class Segmentation extends React.Component {
             </div>
             <div style={{textAlign: "right"}}>
               <Button minimal onClick={this.reset}>Reset</Button>
-              <Button onClick={console.log} icon="download" disabled={!this.isValid()} intent="success">Download</Button>
+              <Button onClick={this.fetchData} icon="download" disabled={!this.isValid()} intent="success">Download</Button>
             </div>
           </Card>
         </div>
