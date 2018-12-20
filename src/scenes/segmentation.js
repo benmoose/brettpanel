@@ -1,16 +1,18 @@
 import React from "react"
 import moment from "moment"
-import { Button, Card, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
+import { Button, Card, Divider, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
 import { DateRangePicker } from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
 import {Page} from "../modules/common/layout"
+import Toaster from "../modules/common/toaster"
 import {callSegmentationEndpoint} from "../utils/mixpanel-client"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
 export default class Segmentation extends React.Component {
   defaultState = {
+    accessKey: "",
     unit: "hour",
     event: "GO_NEARBY_MODE_SELECTED",
     segmentationProperty: "mode_id",
@@ -43,30 +45,49 @@ export default class Segmentation extends React.Component {
     return startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
   }
 
+  showErrorToast = message => {
+    Toaster.show({message, intent: "danger"})
+  }
+
   fetchData = e => {
     e.preventDefault()
     this.setState({isFetching: true})
     const fromDate = moment(this.state.startTime).format("YYYY-MM-DD")
     const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
     const to = getToExpression(this.state.segmentationProperty)
-    return callSegmentationEndpoint(fromDate, toDate, this.state.unit, to)
+    return callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
         .then(({ data }) => {
             const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
             saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
         })
-        .catch(console.error)
+        .catch(error => {
+          const errorMessage = (error.response.data || {}).error
+          this.showErrorToast(errorMessage || error.message)
+        })
         .finally(() => this.setState({isFetching: false}))
   }
 
   isValid = () => {
-    const { unit, startTime, endTime, event } = this.state
-    return unit && startTime && endTime && event
+    const { accessKey, unit, startTime, endTime, event } = this.state
+    return accessKey && unit && startTime && endTime && event
   }
 
   render () {
     return (
       <Page>
         <div className="row">
+          <div className="col-12" style={{marginBottom: "15px"}}>
+            <Card elevation={1} className="col-12">
+              <Label>Access Key</Label>
+              <InputGroup
+                leftIcon="key"
+                placeholder=""
+                type="password"
+                value={this.state.accessKey}
+                onChange={this.handleChange("accessKey")}
+              />
+            </Card>
+          </div>
           <div className="col-8">
             <Card elevation={1} style={{marginBottom: "15px"}}>
               <h4>Date range</h4>
@@ -113,22 +134,30 @@ export default class Segmentation extends React.Component {
               </div>
             </Card>
           </div>
-          <Card className="col-4" style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
-            <div style={{flex: 1}}>
-              <p>From <strong>{this.formatDate(this.state.startTime) || "start"}</strong> to <strong>{this.formatDate(this.state.endTime) || "end"}</strong>.</p>
-              <small>{this.getDateRangeDurationDays()} days</small>
-            </div>
-            <form onSubmit={this.fetchData} style={{textAlign: "right"}}>
-              <Button minimal onClick={this.reset}>Reset</Button>
-              <Button
-                type="submit"
-                icon="download"
-                loading={this.state.isFetching}
-                disabled={!this.isValid()}
-                intent="success"
-              >Download</Button>
-            </form>
-          </Card>
+          <div className="col-4">
+            <Card style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
+              <div style={{flex: 1}}>
+                <p>From <strong>{this.formatDate(this.state.startTime) || "start"}</strong> to <strong>{this.formatDate(this.state.endTime) || "end"}</strong>.</p>
+                <small>{this.getDateRangeDurationDays()} days</small>
+              </div>
+              <Divider style={{margin: "15px 0"}} />
+              <form onSubmit={this.fetchData} style={{display: "flex", justifyContent: "space-between"}}>
+                <div style={{display: "flex", alignItems: "center"}}>
+                  <Button minimal onClick={this.reset}>Reset</Button>
+                </div>
+                <Button
+                  large
+                  type="submit"
+                  icon="download"
+                  loading={this.state.isFetching}
+                  disabled={!this.isValid()}
+                  intent="success"
+                >
+                  Download
+                </Button>
+              </form>
+            </Card>
+          </div>
         </div>
       </Page>
     )

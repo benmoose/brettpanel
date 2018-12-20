@@ -1,8 +1,6 @@
 import axios from "axios"
 
-const mixpanelAccessKey = process.env.REACT_APP_MIXPANEL_ACCESS_KEY
-
-export const callSegmentationEndpoint = (fromDate, toDate, unit, on) => {
+export const callSegmentationEndpoint = (accessKey, fromDate, toDate, unit, on) => {
   return axios.get("https://mixpanel.com/api/2.0/segmentation", {
     params: {
       event: "GO_NEARBY_MODE_SELECTED",
@@ -12,7 +10,7 @@ export const callSegmentationEndpoint = (fromDate, toDate, unit, on) => {
       on: on,
     },
     auth: {
-      username: mixpanelAccessKey,
+      username: accessKey,
       password: "",
     },
   })

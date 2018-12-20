@@ -2,7 +2,7 @@ import React from "react"
 import styled from "styled-components"
 
 const PaddingTop = styled.main`
-  padding-top: 20px;
+  padding: 20px 0;
 `
 
 export const Page = props => (
