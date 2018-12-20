@@ -1,5 +1,6 @@
 FROM node:8-alpine AS builder
 
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -20,4 +21,4 @@ RUN apk add --update nodejs-npm \
     && npm install -g serve
 
 EXPOSE 5000
-CMD ["serve", "-s", "."]
+CMD ["serve"]

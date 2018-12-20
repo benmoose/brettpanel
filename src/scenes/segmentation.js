@@ -1,7 +1,7 @@
 import React from "react"
 import moment from "moment"
-import { Button, Card, Divider, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
-import { DateRangePicker } from "@blueprintjs/datetime"
+import {Button, Card, Divider, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
+import {DateRangePicker} from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
 import {Page} from "../modules/common/layout"
@@ -78,7 +78,13 @@ export default class Segmentation extends React.Component {
         <div className="row">
           <div className="col-12" style={{marginBottom: "15px"}}>
             <Card elevation={1} className="col-12">
-              <Label>Access Key</Label>
+              <div style={{display: "flex", alignItems: "baseline"}}>
+                <Label>Access Key</Label>
+                <small style={{marginLeft: "5px", opacity: 0.65}}>
+                  This is destroyed then you close or refresh the page, it's only used to authenticate with Mixpanel
+                </small>
+                {/*<SecurityTooltip />*/}
+              </div>
               <InputGroup
                 leftIcon="key"
                 placeholder=""
@@ -114,6 +120,7 @@ export default class Segmentation extends React.Component {
                   <div className="col-6">
                     <Label>Event</Label>
                     <InputGroup
+                      leftIcon="mobile-phone"
                       placeholder="e.g. GO_NEARBY_MODE_SELECTED"
                       value={this.state.event}
                       onChange={this.handleChange("event")}
