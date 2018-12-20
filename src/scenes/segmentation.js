@@ -45,8 +45,8 @@ export default class Segmentation extends React.Component {
     return startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
   }
 
-  showErrorToast = message => {
-    Toaster.show({message, intent: "danger"})
+  showToast = (message, intent="default") => {
+    Toaster.show({message, intent})
   }
 
   fetchData = e => {
@@ -59,10 +59,11 @@ export default class Segmentation extends React.Component {
         .then(({ data }) => {
             const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
             saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
+            this.showToast("Download complete")
         })
         .catch(error => {
           const errorMessage = (error.response.data || {}).error
-          this.showErrorToast(errorMessage || error.message)
+          this.showToast(errorMessage || error.message, "danger")
         })
         .finally(() => this.setState({isFetching: false}))
   }
@@ -83,7 +84,6 @@ export default class Segmentation extends React.Component {
                 <small style={{marginLeft: "5px", opacity: 0.65}}>
                   This is destroyed then you close or refresh the page, it's only used to authenticate with Mixpanel
                 </small>
-                {/*<SecurityTooltip />*/}
               </div>
               <InputGroup
                 leftIcon="key"
