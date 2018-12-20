@@ -1,7 +1,8 @@
 import React from "react"
 import moment from "moment"
-import { Button, ButtonGroup, Card, Divider, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
+import { Button, Card, RadioGroup, Radio, InputGroup, Label } from "@blueprintjs/core"
 import { DateRangePicker } from "@blueprintjs/datetime"
+import saveAs from "file-saver"
 
 import {Page} from "../modules/common/layout"
 import {callSegmentationEndpoint} from "../utils/mixpanel-client"
@@ -15,6 +16,7 @@ export default class Segmentation extends React.Component {
     segmentationProperty: "mode_id",
     startTime: null,
     endTime: null,
+    isFetching: false,
   }
 
   state = {...this.defaultState}
@@ -32,11 +34,6 @@ export default class Segmentation extends React.Component {
     this.setState({startTime, endTime})
   }
 
-  isValid = () => {
-    const { unit, startTime, endTime, event } = this.state
-    return unit && startTime && endTime && event
-  }
-
   formatDate = (date) => {
     return date ? moment(date).format("ddd, MMM Do YYYY") : null
   }
@@ -46,8 +43,24 @@ export default class Segmentation extends React.Component {
     return startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
   }
 
-  fetchData = () => {
-    console.log("not implemented")
+  fetchData = e => {
+    e.preventDefault()
+    this.setState({isFetching: true})
+    const fromDate = moment(this.state.startTime).format("YYYY-MM-DD")
+    const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
+    const to = getToExpression(this.state.segmentationProperty)
+    return callSegmentationEndpoint(fromDate, toDate, this.state.unit, to)
+        .then(({ data }) => {
+            const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
+            saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
+        })
+        .catch(console.error)
+        .finally(() => this.setState({isFetching: false}))
+  }
+
+  isValid = () => {
+    const { unit, startTime, endTime, event } = this.state
+    return unit && startTime && endTime && event
   }
 
   render () {
@@ -105,13 +118,23 @@ export default class Segmentation extends React.Component {
               <p>From <strong>{this.formatDate(this.state.startTime) || "start"}</strong> to <strong>{this.formatDate(this.state.endTime) || "end"}</strong>.</p>
               <small>{this.getDateRangeDurationDays()} days</small>
             </div>
-            <div style={{textAlign: "right"}}>
+            <form onSubmit={this.fetchData} style={{textAlign: "right"}}>
               <Button minimal onClick={this.reset}>Reset</Button>
-              <Button onClick={this.fetchData} icon="download" disabled={!this.isValid()} intent="success">Download</Button>
-            </div>
+              <Button
+                type="submit"
+                icon="download"
+                loading={this.state.isFetching}
+                disabled={!this.isValid()}
+                intent="success"
+              >Download</Button>
+            </form>
           </Card>
         </div>
       </Page>
     )
   }
+}
+
+const getToExpression = (property) => {
+  return `properties["${property}"]`
 }

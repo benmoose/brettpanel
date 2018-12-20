@@ -6,6 +6,7 @@
     "@blueprintjs/core": "^3.10.0",
     "@blueprintjs/datetime": "^3.5.0",
     "axios": "^0.18.0",
+    "file-saver": "^2.0.0",
     "moment": "^2.23.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
