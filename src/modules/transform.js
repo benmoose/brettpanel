@@ -7,5 +7,5 @@ export const transformSegmentation = (series, valuesByModeId) => {
         sum: valuesByModeId[property_value][date],
       }
     })
-  }, [])[0]
+  }, [])
 }
