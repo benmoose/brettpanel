@@ -43,7 +43,8 @@ export default class Segmentation extends React.Component {
 
   getDateRangeDurationDays = () => {
     const { startTime, endTime } = this.state
-    return startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
+    const days = startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
+    return days.toFixed(0)  // fixes issue where some fractional day is computed
   }
 
   showToast = (message, intent="default") => {

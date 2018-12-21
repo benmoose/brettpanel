@@ -1,5 +1,6 @@
 import React from "react"
 import styled from "styled-components"
+import {Alignment, Navbar} from "@blueprintjs/core"
 import Logo from "../../static/logo.svg"
 
 const NavbarLogo = styled.img`
@@ -9,12 +10,12 @@ const NavbarLogo = styled.img`
 `
 
 export default () => (
-    <nav className="bp3-navbar bp3-dark">
+    <Navbar className="bp3-dark">
         <div className="container">
-            <div className="bp3-navbar-group bp3-align-left">
+            <Navbar.Group align={Alignment.LEFT}>
                 <NavbarLogo src={Logo} />
                 <div className="bp3-navbar-heading"><strong>Brettpanel</strong></div>
-            </div>
+            </Navbar.Group>
         </div>
-    </nav>
+    </Navbar>
 )
