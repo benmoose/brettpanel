@@ -7,6 +7,7 @@ import saveAs from "file-saver"
 import {Page} from "../modules/common/layout"
 import Toaster from "../modules/common/toaster"
 import {callSegmentationEndpoint} from "../utils/mixpanel-client"
+import {transformSegmentation} from "../modules/transform"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
@@ -56,16 +57,21 @@ export default class Segmentation extends React.Component {
     const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
     const to = getToExpression(this.state.segmentationProperty)
     return callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
-        .then(({ data }) => {
-            const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
-            saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
-            this.showToast("Download complete")
-        })
-        .catch(error => {
+      .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
+      .then(data => {
+        const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
+        saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
+        this.showToast("Download complete")
+      })
+      .catch(error => {
+        try {
           const errorMessage = (error.response.data || {}).error
           this.showToast(errorMessage || error.message, "danger")
-        })
-        .finally(() => this.setState({isFetching: false}))
+        } catch {
+          this.showToast(error.message, "danger")
+        }
+      })
+      .finally(() => this.setState({isFetching: false}))
   }
 
   isValid = () => {
