@@ -6,7 +6,7 @@ import saveAs from "file-saver"
 
 import {Page} from "../modules/common/layout"
 import Toaster from "../modules/common/toaster"
-import {callSegmentationEndpoint} from "../utils/mixpanel-client"
+import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../utils/mixpanel-client"
 import {transformSegmentation} from "../modules/transform"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
@@ -47,8 +47,21 @@ export default class Segmentation extends React.Component {
     return days.toFixed(0)  // fixes issue where some fractional day is computed
   }
 
-  showToast = (message, intent="default") => {
+  showToast = (message, intent = "default") => {
     Toaster.show({message, intent})
+  }
+
+  getDownloadFilename = () => {
+    const { segmentationProperty, startTime, endTime } = this.props
+    return `${segmentationProperty}-${startTime}-${endTime}.json`
+  }
+
+  saveObject = (data, filename) => {
+    const dataBlob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      {type: "application/json;charset=utf-8"},
+    )
+    saveAs(dataBlob, filename)
   }
 
   fetchData = e => {
@@ -60,17 +73,13 @@ export default class Segmentation extends React.Component {
     return callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
       .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
       .then(data => {
-        const dataBlob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json;charset=utf-8"})
-        saveAs(dataBlob, `mixpanel-${fromDate}-${toDate}.json`)
+        this.saveObject(data, this.getDownloadFilename())
         this.showToast("Download complete")
       })
       .catch(error => {
-        try {
-          const errorMessage = (error.response.data || {}).error
-          this.showToast(errorMessage || error.message, "danger")
-        } catch {
-          this.showToast(error.message, "danger")
-        }
+        const mixpanelErrorMessage = getMixpanelResponseErrorMessage(error.response)
+        const errorMessage = mixpanelErrorMessage || error.message
+        this.showToast(errorMessage, "danger")
       })
       .finally(() => this.setState({isFetching: false}))
   }
