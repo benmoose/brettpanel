@@ -1,13 +1,14 @@
 import React from "react"
 import moment from "moment"
-import {Button, Card, Divider, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
+import {Card, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
 import {DateRangePicker} from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
-import {Page} from "../modules/common/layout"
-import Toaster from "../modules/common/toaster"
-import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../utils/mixpanel-client"
-import {transformSegmentation} from "../modules/transform"
+import {Page} from "../../modules/common/layout"
+import Toaster from "../../modules/common/toaster"
+import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
+import {transformSegmentation} from "../../modules/transform"
+import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
@@ -158,28 +159,16 @@ export default class Segmentation extends React.Component {
             </Card>
           </div>
           <div className="col-4">
-            <Card style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
-              <div style={{flex: 1}}>
-                <p>From <strong>{this.formatDate(this.state.startTime) || "start"}</strong> to <strong>{this.formatDate(this.state.endTime) || "end"}</strong>.</p>
-                <small>{this.getDateRangeDurationDays()} days</small>
-              </div>
-              <Divider style={{margin: "15px 0"}} />
-              <form onSubmit={this.fetchData} style={{display: "flex", justifyContent: "space-between"}}>
-                <div style={{display: "flex", alignItems: "center"}}>
-                  <Button minimal onClick={this.reset}>Reset</Button>
-                </div>
-                <Button
-                  large
-                  type="submit"
-                  icon="download"
-                  loading={this.state.isFetching}
-                  disabled={!this.isValid()}
-                  intent="success"
-                >
-                  Download
-                </Button>
-              </form>
-            </Card>
+            <SummaryPanel
+              isValid={this.isValid()}
+              isFetching={this.state.isFetching}
+              startTime={this.state.startTime}
+              endTime={this.state.endTime}
+              actions={{
+                onSubmit: this.fetchData,
+                onReset: this.reset,
+              }}
+            />
           </div>
         </div>
       </Page>
