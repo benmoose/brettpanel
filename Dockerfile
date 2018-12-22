@@ -21,4 +21,4 @@ RUN apk add --update nodejs-npm \
     && npm install -g serve
 
 EXPOSE 5000
-CMD ["serve"]
+ENTRYPOINT ["serve", "-n", "-s"]
