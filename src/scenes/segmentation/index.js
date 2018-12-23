@@ -111,16 +111,27 @@ export default class Segmentation extends React.Component {
           </div>
           <div className="col-8">
             <Card elevation={1} style={{marginBottom: "15px"}}>
-              <h4>Date range</h4>
+              <h4>Select date range</h4>
               <DateRangePicker
+                shortcuts
                 value={[this.state.startTime, this.state.endTime]}
                 onChange={this.handleDateRangeChange}
-                shortcuts={false}
               />
             </Card>
             <Card elevation={1}>
+              <h4>Customise download</h4>
               <div className="container-fluid">
                 <div className="row">
+                  <div className="col-6">
+                    <Label>Event name</Label>
+                    <InputGroup
+                      leftIcon="mobile-phone"
+                      placeholder="e.g. GO_NEARBY_MODE_SELECTED"
+                      value={this.state.event}
+                      onChange={this.handleChange("event")}
+                    />
+                  </div>
+
                   <div className="col-3">
                     <RadioGroup
                       label="Group by"
@@ -132,19 +143,9 @@ export default class Segmentation extends React.Component {
                     </RadioGroup>
                   </div>
 
-                  <div className="col-6">
-                    <Label>Event</Label>
-                    <InputGroup
-                      leftIcon="mobile-phone"
-                      placeholder="e.g. GO_NEARBY_MODE_SELECTED"
-                      value={this.state.event}
-                      onChange={this.handleChange("event")}
-                    />
-                  </div>
-
                   <div className="col-3">
                     <RadioGroup
-                      label="Segmentation property"
+                      label="Property name"
                       selectedValue={this.state.segmentationProperty}
                       onChange={this.handleChange("segmentationProperty")}
                     >
