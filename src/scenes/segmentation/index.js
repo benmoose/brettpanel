@@ -1,13 +1,14 @@
 import React from "react"
 import moment from "moment"
-import {Button, Card, Divider, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
+import {Card, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
 import {DateRangePicker} from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
-import {Page} from "../modules/common/layout"
-import Toaster from "../modules/common/toaster"
-import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../utils/mixpanel-client"
-import {transformSegmentation} from "../modules/transform"
+import {Page} from "../../modules/common/layout"
+import Toaster from "../../modules/common/toaster"
+import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
+import {objectToCSVString, objectToJSONString, stringToBlob} from "../../modules/transform"
+import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
@@ -37,45 +38,43 @@ export default class Segmentation extends React.Component {
     this.setState({startTime, endTime})
   }
 
-  formatDate = (date) => {
-    return date ? moment(date).format("ddd, MMM Do YYYY") : null
-  }
-
-  getDateRangeDurationDays = () => {
-    const { startTime, endTime } = this.state
-    const days = startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
-    return days.toFixed(0)  // fixes issue where some fractional day is computed
-  }
-
   showToast = (message, intent = "default") => {
     Toaster.show({message, intent})
   }
 
-  getDownloadFilename = () => {
-    const { segmentationProperty, startTime, endTime } = this.props
-    return `${segmentationProperty}-${startTime}-${endTime}.json`
+  getDownloadFilename = (ext) => {
+    const { segmentationProperty, unit, startTime, endTime } = this.state
+    return `${segmentationProperty}-${unit}-${formatDate(startTime)}-${formatDate(endTime)}.${ext}`
   }
 
-  saveObject = (data, filename) => {
-    const dataBlob = new Blob(
-      [JSON.stringify(data, null, 2)],
-      {type: "application/json;charset=utf-8"},
-    )
-    saveAs(dataBlob, filename)
-  }
-
-  fetchData = e => {
+  fetchDataAndDownload = (e, type) => {
     e.preventDefault()
     this.setState({isFetching: true})
     const fromDate = moment(this.state.startTime).format("YYYY-MM-DD")
     const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
     const to = getToExpression(this.state.segmentationProperty)
-    return callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
+
+    callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
       .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
-      .then(data => {
-        this.saveObject(data, this.getDownloadFilename())
-        this.showToast("Download complete")
+      .then(downloadedData => {
+        const filename = this.getDownloadFilename(type)
+        switch (type) {
+          case "csv":
+            const flattenedData = downloadedData.reduce((acc, bucket) => {
+              return [...acc, ...bucket]
+            }, [])
+            const csvString = objectToCSVString(flattenedData)
+            saveAs(stringToBlob(csvString), filename)
+            break
+          case "json":
+            const jsonString = objectToJSONString(downloadedData)
+            saveAs(stringToBlob(jsonString), filename)
+            break
+          default:
+            console.error(`Received unknown type: ${type}`)
+        }
       })
+      .then(() => this.showToast("Download complete"))
       .catch(error => {
         const mixpanelErrorMessage = getMixpanelResponseErrorMessage(error.response)
         const errorMessage = mixpanelErrorMessage || error.message
@@ -102,7 +101,7 @@ export default class Segmentation extends React.Component {
                 </small>
               </div>
               <InputGroup
-                leftIcon="key"
+                leftIcon="lock"
                 placeholder=""
                 type="password"
                 value={this.state.accessKey}
@@ -158,28 +157,16 @@ export default class Segmentation extends React.Component {
             </Card>
           </div>
           <div className="col-4">
-            <Card style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
-              <div style={{flex: 1}}>
-                <p>From <strong>{this.formatDate(this.state.startTime) || "start"}</strong> to <strong>{this.formatDate(this.state.endTime) || "end"}</strong>.</p>
-                <small>{this.getDateRangeDurationDays()} days</small>
-              </div>
-              <Divider style={{margin: "15px 0"}} />
-              <form onSubmit={this.fetchData} style={{display: "flex", justifyContent: "space-between"}}>
-                <div style={{display: "flex", alignItems: "center"}}>
-                  <Button minimal onClick={this.reset}>Reset</Button>
-                </div>
-                <Button
-                  large
-                  type="submit"
-                  icon="download"
-                  loading={this.state.isFetching}
-                  disabled={!this.isValid()}
-                  intent="success"
-                >
-                  Download
-                </Button>
-              </form>
-            </Card>
+            <SummaryPanel
+              isValid={this.isValid()}
+              isFetching={this.state.isFetching}
+              startTime={this.state.startTime}
+              endTime={this.state.endTime}
+              actions={{
+                onRequestDownload: this.fetchDataAndDownload,
+                onReset: this.reset,
+              }}
+            />
           </div>
         </div>
       </Page>
@@ -187,6 +174,22 @@ export default class Segmentation extends React.Component {
   }
 }
 
+const formatDate = (date) => {
+  return date ? moment(date).format("YYYY-MM-DD") : null
+}
+
 const getToExpression = (property) => {
   return `properties["${property}"]`
+}
+
+const transformSegmentation = (series, valuesByModeId) => {
+  return series.map((date) => {
+    return Object.keys(valuesByModeId).map(property_value => {
+      return {
+        date,
+        property_value,
+        sum: valuesByModeId[property_value][date],
+      }
+    })
+  }, [])
 }

@@ -12,8 +12,9 @@ $ docker run -p 5000:5000 --rm benmoose/brettpanel:latest
 
 ### Other options
 
-Use the `-l/--listen` flag to specify a custom container port.
-Remember to update the host:container port mapping.
+Options passed to `docker run benmoose/brettpanel` are passed directly to [Serve](https://github.com/zeit/serve).
+So, for example, to specify a custom container port you can use Serve's `-l/--listen` flag.
+
 ```sh
 $ docker run -p 5000:1234 --rm benmoose/brettpanel:latest -l 1234
 ```
