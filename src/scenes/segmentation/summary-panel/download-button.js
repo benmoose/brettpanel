@@ -18,11 +18,7 @@ export default ({ isFetching, isDisabled, actions }) => {
   const downloadHandler = downloadType => e => actions.onRequestDownload(e, downloadType)
 
   const DownloadOptions = (
-    <Menu>
-      <Menu.Item
-        onClick={downloadHandler(DownloadTypes.RAW)}
-        text="Download raw response"
-      />
+    <Menu large>
       <Menu.Item
         onClick={downloadHandler(DownloadTypes.JSON)}
         text="Download JSON"

@@ -18,7 +18,7 @@ export default ({ isValid, isFetching, startTime, endTime, actions }) => {
           isFetching={isFetching}
           isDisabled={!isValid}
           actions={{
-            onRequestDownload: console.log,
+            onRequestDownload: actions.onRequestDownload,
           }}
         />
       </div>

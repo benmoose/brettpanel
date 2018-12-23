@@ -7,7 +7,7 @@ import saveAs from "file-saver"
 import {Page} from "../../modules/common/layout"
 import Toaster from "../../modules/common/toaster"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
-import {transformSegmentation} from "../../modules/transform"
+import {objectToCSVBlob, objectToJSONBlob} from "../../modules/transform"
 import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
@@ -57,26 +57,29 @@ export default class Segmentation extends React.Component {
     return `${segmentationProperty}-${startTime}-${endTime}.json`
   }
 
-  saveObject = (data, filename) => {
-    const dataBlob = new Blob(
-      [JSON.stringify(data, null, 2)],
-      {type: "application/json;charset=utf-8"},
-    )
-    saveAs(dataBlob, filename)
-  }
-
-  fetchData = e => {
+  fetchDataAndDownload = (e, type) => {
     e.preventDefault()
     this.setState({isFetching: true})
     const fromDate = moment(this.state.startTime).format("YYYY-MM-DD")
     const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
     const to = getToExpression(this.state.segmentationProperty)
-    return callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
+
+    const filename = this.getDownloadFilename()
+    callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
       .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
-      .then(data => {
-        this.saveObject(data, this.getDownloadFilename())
-        this.showToast("Download complete")
+      .then(downloadedData => {
+        switch (type) {
+          case "csv":
+            saveAs(objectToCSVBlob(downloadedData), filename)
+            break
+          case "json":
+            saveAs(objectToJSONBlob(downloadedData), filename)
+            break
+          default:
+            console.error(`Received unknown type: ${type}`)
+        }
       })
+      .then(() => this.showToast("Download complete"))
       .catch(error => {
         const mixpanelErrorMessage = getMixpanelResponseErrorMessage(error.response)
         const errorMessage = mixpanelErrorMessage || error.message
@@ -165,7 +168,7 @@ export default class Segmentation extends React.Component {
               startTime={this.state.startTime}
               endTime={this.state.endTime}
               actions={{
-                onSubmit: this.fetchData,
+                onRequestDownload: this.fetchDataAndDownload,
                 onReset: this.reset,
               }}
             />
@@ -178,4 +181,16 @@ export default class Segmentation extends React.Component {
 
 const getToExpression = (property) => {
   return `properties["${property}"]`
+}
+
+const transformSegmentation = (series, valuesByModeId) => {
+  return series.map((date) => {
+    return Object.keys(valuesByModeId).map(property_value => {
+      return {
+        date,
+        property_value,
+        sum: valuesByModeId[property_value][date],
+      }
+    })
+  }, [])
 }
