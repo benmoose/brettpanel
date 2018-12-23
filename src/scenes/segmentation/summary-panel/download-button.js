@@ -7,8 +7,29 @@ const PopoverTargetFullHeight = styled.div`
   display: flex;
 `
 
-export default ({ isFetching, isDisabled }) => {
+const DownloadTypes = {
+  CSV: "csv",
+  JSON: "json",
+  RAW: "raw",
+}
+
+export default ({ isFetching, isDisabled, actions }) => {
   const intent = isDisabled ? Intent.NONE : Intent.SUCCESS
+  const downloadHandler = downloadType => e => actions.onRequestDownload(e, downloadType)
+
+  const DownloadOptions = (
+    <Menu>
+      <Menu.Item
+        onClick={downloadHandler(DownloadTypes.RAW)}
+        text="Download raw response"
+      />
+      <Menu.Item
+        onClick={downloadHandler(DownloadTypes.JSON)}
+        text="Download JSON"
+      />
+    </Menu>
+  )
+
   return (
     <ButtonGroup>
       <Button
@@ -18,6 +39,7 @@ export default ({ isFetching, isDisabled }) => {
         intent={intent}
         loading={isFetching}
         disabled={isDisabled}
+        onClick={downloadHandler(DownloadTypes.CSV)}
       >
         Download CSV
       </Button>
@@ -33,9 +55,3 @@ export default ({ isFetching, isDisabled }) => {
     )
 }
 
-const DownloadOptions = (
-  <Menu>
-    <Menu.Item text="Download raw response" />
-    <Menu.Item text="Download JSON" />
-  </Menu>
-)

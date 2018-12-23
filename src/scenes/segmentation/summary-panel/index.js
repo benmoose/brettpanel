@@ -10,12 +10,18 @@ export default ({ isValid, isFetching, startTime, endTime, actions }) => {
         Downloading data for <strong>{getDateRangeDurationDays(startTime, endTime)}</strong> days
       </div>
       <Divider style={{margin: "15px 0"}} />
-      <form onSubmit={actions.onSubmit} style={{display: "flex", justifyContent: "space-between"}}>
+      <div style={{display: "flex", justifyContent: "space-between"}}>
         <div style={{display: "flex", alignItems: "center"}}>
           <Button minimal onClick={actions.onReset}>Reset</Button>
         </div>
-        <DownloadButton isFetching={isFetching} isDisabled={!isValid} />
-      </form>
+        <DownloadButton
+          isFetching={isFetching}
+          isDisabled={!isValid}
+          actions={{
+            onRequestDownload: console.log,
+          }}
+        />
+      </div>
     </Card>
   )
 }
