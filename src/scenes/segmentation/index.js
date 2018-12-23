@@ -38,23 +38,13 @@ export default class Segmentation extends React.Component {
     this.setState({startTime, endTime})
   }
 
-  formatDate = (date) => {
-    return date ? moment(date).format("ddd, MMM Do YYYY") : null
-  }
-
-  getDateRangeDurationDays = () => {
-    const { startTime, endTime } = this.state
-    const days = startTime && endTime ? moment.duration(moment(endTime).diff(moment(startTime))).asDays() + 1 : 0
-    return days.toFixed(0)  // fixes issue where some fractional day is computed
-  }
-
   showToast = (message, intent = "default") => {
     Toaster.show({message, intent})
   }
 
   getDownloadFilename = (ext) => {
-    const { segmentationProperty, startTime, endTime } = this.state
-    return `${segmentationProperty}-${startTime}-${endTime}.${ext}`
+    const { segmentationProperty, unit, startTime, endTime } = this.state
+    return `${segmentationProperty}-${unit}-${formatDate(startTime)}-${formatDate(endTime)}.${ext}`
   }
 
   fetchDataAndDownload = (e, type) => {
@@ -111,7 +101,7 @@ export default class Segmentation extends React.Component {
                 </small>
               </div>
               <InputGroup
-                leftIcon="key"
+                leftIcon="lock"
                 placeholder=""
                 type="password"
                 value={this.state.accessKey}
@@ -182,6 +172,10 @@ export default class Segmentation extends React.Component {
       </Page>
     )
   }
+}
+
+const formatDate = (date) => {
+  return date ? moment(date).format("YYYY-MM-DD") : null
 }
 
 const getToExpression = (property) => {

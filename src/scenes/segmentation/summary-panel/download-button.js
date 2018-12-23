@@ -1,8 +1,8 @@
 import React from "react"
 import styled from "styled-components"
-import {Button, ButtonGroup, Menu, Popover, Intent, Position} from "@blueprintjs/core"
+import {Button, ButtonGroup, Popover, Intent, Position, Alignment} from "@blueprintjs/core"
 
-const PopoverTargetFullHeight = styled.div`
+const PopoverTarget = styled.div`
   height: 100%;
   display: flex;
 `
@@ -18,36 +18,52 @@ export default ({ isFetching, isDisabled, actions }) => {
   const downloadHandler = downloadType => e => actions.onRequestDownload(e, downloadType)
 
   const DownloadOptions = (
-    <Menu large>
-      <Menu.Item
-        onClick={downloadHandler(DownloadTypes.JSON)}
+    <ButtonGroup vertical alignText={Alignment.RIGHT}>
+      <DownloadButton
+        downloadType={DownloadTypes.JSON}
         text="Download JSON"
+        intent={Intent.NONE}
+        isFetching={isFetching}
+        isDisabled={isDisabled}
+        onClick={downloadHandler}
       />
-    </Menu>
+    </ButtonGroup>
   )
 
   return (
     <ButtonGroup>
-      <Button
-        large
-        type="submit"
-        icon="download"
+      <DownloadButton
+        downloadType={DownloadTypes.CSV}
+        text="Download CSV"
         intent={intent}
-        loading={isFetching}
-        disabled={isDisabled}
-        onClick={downloadHandler(DownloadTypes.CSV)}
-      >
-        Download CSV
-      </Button>
+        isFetching={isFetching}
+        isDisabled={isDisabled}
+        onClick={downloadHandler}
+      />
       <Popover
         minimal
         content={DownloadOptions}
         position={Position.BOTTOM_RIGHT}
-        targetTagName={PopoverTargetFullHeight}
+        targetTagName={PopoverTarget}
       >
-        <Button disabled={isDisabled} icon="caret-down" intent={intent}/>
+        <Button disabled={isDisabled} icon="caret-down" intent={intent} />
       </Popover>
     </ButtonGroup>
     )
 }
 
+const DownloadButton = ({downloadType, text, intent, isFetching, isDisabled, onClick}) => {
+  return (
+    <Button
+      large
+      type="submit"
+      icon="download"
+      intent={intent}
+      loading={isFetching}
+      disabled={isDisabled}
+      onClick={onClick(downloadType)}
+    >
+      {text}
+    </Button>
+  )
+}
