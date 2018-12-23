@@ -20,7 +20,9 @@ export const callSegmentationEndpoint = (accessKey, fromDate, toDate, unit, on) 
 }
 
 export const getMixpanelResponseErrorMessage = (response) => {
-  console.log(response)
+  if (!response) {
+    return null
+  }
   const responseData = response.data
   if (!responseData) {
     return null

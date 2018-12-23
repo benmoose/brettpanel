@@ -7,7 +7,7 @@ import saveAs from "file-saver"
 import {Page} from "../../modules/common/layout"
 import Toaster from "../../modules/common/toaster"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
-import {objectToCSVBlob, objectToJSONBlob} from "../../modules/transform"
+import {objectToCSVString, objectToJSONString, stringToBlob} from "../../modules/transform"
 import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
@@ -52,9 +52,9 @@ export default class Segmentation extends React.Component {
     Toaster.show({message, intent})
   }
 
-  getDownloadFilename = () => {
-    const { segmentationProperty, startTime, endTime } = this.props
-    return `${segmentationProperty}-${startTime}-${endTime}.json`
+  getDownloadFilename = (ext) => {
+    const { segmentationProperty, startTime, endTime } = this.state
+    return `${segmentationProperty}-${startTime}-${endTime}.${ext}`
   }
 
   fetchDataAndDownload = (e, type) => {
@@ -64,16 +64,21 @@ export default class Segmentation extends React.Component {
     const toDate = moment(this.state.endTime).format("YYYY-MM-DD")
     const to = getToExpression(this.state.segmentationProperty)
 
-    const filename = this.getDownloadFilename()
     callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
       .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
       .then(downloadedData => {
+        const filename = this.getDownloadFilename(type)
         switch (type) {
           case "csv":
-            saveAs(objectToCSVBlob(downloadedData), filename)
+            const flattenedData = downloadedData.reduce((acc, bucket) => {
+              return [...acc, ...bucket]
+            }, [])
+            const csvString = objectToCSVString(flattenedData)
+            saveAs(stringToBlob(csvString), filename)
             break
           case "json":
-            saveAs(objectToJSONBlob(downloadedData), filename)
+            const jsonString = objectToJSONString(downloadedData)
+            saveAs(stringToBlob(jsonString), filename)
             break
           default:
             console.error(`Received unknown type: ${type}`)

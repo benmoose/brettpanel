@@ -1,4 +1,4 @@
-const {objectToCSVBlob} = require("./transform")
+import {objectToCSVString, objectToJSONString} from "./transform"
 
 const data = [
   {a: 42, b: "foo"},
@@ -6,6 +6,10 @@ const data = [
   {a: 89, b: "baz"},
 ]
 
-test("object to CSV blob", () => {
-  expect(objectToCSVBlob(data)).toBeInstanceOf(Blob)
+test("CSV transformation returns correct data", () => {
+  expect(objectToCSVString(data)).toBe("a,b\n42,foo\n64,bar\n89,baz")
+})
+
+test("JSON transformation returns correct data", () => {
+  expect(objectToJSONString(data)).toBe(JSON.stringify(data))
 })
