@@ -1,11 +1,12 @@
 import React from "react"
 import moment from "moment"
-import {Button, Card, Divider} from "@blueprintjs/core"
+import {Button, Divider} from "@blueprintjs/core"
+import Panel from "../../../modules/common/panel"
 import DownloadButton from "./download-button"
 
 export default ({ isValid, isFetching, startTime, endTime, actions }) => {
   return (
-    <Card style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
+    <Panel secondary style={{display: "flex", flexDirection: "column", background: "#fafafb"}}>
       <div style={{flex: 1}}>
         Downloading data for <strong>{getDateRangeDurationDays(startTime, endTime)}</strong> days
       </div>
@@ -22,7 +23,7 @@ export default ({ isValid, isFetching, startTime, endTime, actions }) => {
           }}
         />
       </div>
-    </Card>
+    </Panel>
   )
 }
 

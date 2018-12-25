@@ -1,13 +1,14 @@
 import React from "react"
 import moment from "moment"
-import {Card, RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
+import {RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
 import {DateRangePicker} from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
 import {Page} from "../../modules/common/layout"
+import Panel from "../../modules/common/panel"
 import Toaster from "../../modules/common/toaster"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
-import {objectToCSVString, objectToJSONString, stringToBlob} from "../../modules/transform"
+import {objectToCSVString, objectToJSONString, stringToBlob} from "../../utils/transform"
 import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
@@ -93,7 +94,7 @@ export default class Segmentation extends React.Component {
       <Page>
         <div className="row">
           <div className="col-12" style={{marginBottom: "15px"}}>
-            <Card elevation={1} className="col-12">
+            <Panel className="col-12">
               <div style={{display: "flex", alignItems: "baseline"}}>
                 <Label>Access Key</Label>
                 <small style={{marginLeft: "5px", opacity: 0.65}}>
@@ -107,18 +108,18 @@ export default class Segmentation extends React.Component {
                 value={this.state.accessKey}
                 onChange={this.handleChange("accessKey")}
               />
-            </Card>
+            </Panel>
           </div>
           <div className="col-8">
-            <Card elevation={1} style={{marginBottom: "15px"}}>
+            <Panel style={{marginBottom: "15px"}}>
               <h4>Select date range</h4>
               <DateRangePicker
                 shortcuts
                 value={[this.state.startTime, this.state.endTime]}
                 onChange={this.handleDateRangeChange}
               />
-            </Card>
-            <Card elevation={1}>
+            </Panel>
+            <Panel>
               <h4>Customise download</h4>
               <div className="container-fluid">
                 <div className="row">
@@ -155,7 +156,7 @@ export default class Segmentation extends React.Component {
                   </div>
                 </div>
               </div>
-            </Card>
+            </Panel>
           </div>
           <div className="col-4">
             <SummaryPanel
