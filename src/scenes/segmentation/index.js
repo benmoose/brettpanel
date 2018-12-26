@@ -1,14 +1,14 @@
 import React from "react"
 import moment from "moment"
-import {RadioGroup, Radio, InputGroup, Label} from "@blueprintjs/core"
-import {DateRangePicker} from "@blueprintjs/datetime"
 import saveAs from "file-saver"
 
 import {Page} from "../../modules/common/layout"
-import Panel from "../../modules/common/panel"
 import Toaster from "../../modules/common/toaster"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
 import {objectToCSVString, objectToJSONString, stringToBlob} from "../../utils/transform"
+import AccessKeyPanel from "./access-key-panel"
+import DateRangePanel from "./date-range-panel"
+import OptionsPanel from "./options-panel"
 import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
@@ -93,70 +93,32 @@ export default class Segmentation extends React.Component {
     return (
       <Page>
         <div className="row">
-          <div className="col-12" style={{marginBottom: "15px"}}>
-            <Panel className="col-12">
-              <div style={{display: "flex", alignItems: "baseline"}}>
-                <Label>Access Key</Label>
-                <small style={{marginLeft: "5px", opacity: 0.65}}>
-                  This is lost when you close or refresh the page, it's only used to authenticate with Mixpanel
-                </small>
-              </div>
-              <InputGroup
-                leftIcon="lock"
-                placeholder=""
-                type="password"
-                value={this.state.accessKey}
-                onChange={this.handleChange("accessKey")}
-              />
-            </Panel>
+          <div className="col-12">
+            <AccessKeyPanel
+              accessKeyValue={this.state.accessKey}
+              onChange={this.handleChange("accessKey")}
+            />
           </div>
           <div className="col-8">
-            <Panel style={{marginBottom: "15px"}}>
-              <h4>Select date range</h4>
-              <DateRangePicker
-                shortcuts
-                value={[this.state.startTime, this.state.endTime]}
-                onChange={this.handleDateRangeChange}
-              />
-            </Panel>
-            <Panel>
-              <h4>Customise download</h4>
-              <div className="container-fluid">
-                <div className="row">
-                  <div className="col-6">
-                    <Label>Event name</Label>
-                    <InputGroup
-                      leftIcon="mobile-phone"
-                      placeholder="e.g. GO_NEARBY_MODE_SELECTED"
-                      value={this.state.event}
-                      onChange={this.handleChange("event")}
-                    />
-                  </div>
-
-                  <div className="col-3">
-                    <RadioGroup
-                      label="Group by"
-                      selectedValue={this.state.unit}
-                      onChange={this.handleChange("unit")}
-                    >
-                      <Radio label="Hour" value="hour" />
-                      <Radio label="Day" value="day" />
-                    </RadioGroup>
-                  </div>
-
-                  <div className="col-3">
-                    <RadioGroup
-                      label="Property name"
-                      selectedValue={this.state.segmentationProperty}
-                      onChange={this.handleChange("segmentationProperty")}
-                    >
-                      <Radio label="Mode ID" value="mode_id" />
-                      <Radio label="Request Brand IDs" value="Request Brand IDs" />
-                    </RadioGroup>
-                  </div>
-                </div>
-              </div>
-            </Panel>
+            <DateRangePanel
+              startTime={this.state.startTime}
+              endTime={this.state.endTime}
+              onChange={this.handleDateRangeChange}
+            />
+            <OptionsPanel
+              eventName={{
+                value: this.state.event,
+                onChange: this.handleChange("eventName"),
+              }}
+              unit={{
+                value: this.state.unit,
+                onChange: this.handleChange("unit"),
+              }}
+              property={{
+                value: this.state.segmentationProperty,
+                onChange: this.handleChange("segmentationProperty"),
+              }}
+            />
           </div>
           <div className="col-4">
             <SummaryPanel

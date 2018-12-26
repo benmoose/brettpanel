@@ -1,14 +1,19 @@
 import React from "react"
+import styled from "styled-components"
 import {Card} from "@blueprintjs/core"
 
-export default ({children, secondary = false, ...props}) => {
+const CardWithPadding = styled(Card)`
+  margin-bottom: 15px;
+  background-color: ${props => props.secondary ? "#fafafb" : "white"}
+`
+
+export default ({children, secondary = false}) => {
   const elevation = secondary ? 0 : 1
   return (
-    <Card
+    <CardWithPadding
       elevation={elevation}
-      {...props}
-    >
-      {children}
-    </Card>
+      secondary={secondary}
+      children={children}
+    />
   )
 }
