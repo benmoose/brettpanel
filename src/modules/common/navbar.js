@@ -12,10 +12,12 @@ const NavbarLogo = styled.img`
 export default () => (
     <Navbar className="bp3-dark">
         <div className="container">
+          <div className="row">
             <Navbar.Group align={Alignment.LEFT}>
                 <NavbarLogo src={Logo} />
                 <div className="bp3-navbar-heading"><strong>Brettpanel</strong></div>
             </Navbar.Group>
+          </div>
         </div>
     </Navbar>
 )
