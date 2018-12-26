@@ -108,7 +108,7 @@ export default class Segmentation extends React.Component {
             <OptionsPanel
               eventName={{
                 value: this.state.event,
-                onChange: this.handleChange("eventName"),
+                onChange: this.handleChange("event"),
               }}
               unit={{
                 value: this.state.unit,
