@@ -1,9 +1,11 @@
 import React from "react"
+import PropTypes from "prop-types"
 import moment from "moment"
 import saveAs from "file-saver"
 
 import {Page} from "../../modules/common/layout"
 import Toaster from "../../modules/common/toaster"
+import {getLocalStorageItem, setLocalStorageItem} from "../../utils/local-storage"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
 import {objectToCSVString, objectToJSONString, stringToBlob} from "../../utils/transform"
 import AccessKeyPanel from "./access-key-panel"
@@ -14,7 +16,7 @@ import SummaryPanel from "./summary-panel"
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
 export default class Segmentation extends React.Component {
-  defaultState = {
+  static defaultState = {
     accessKey: "",
     unit: "hour",
     event: "GO_NEARBY_MODE_SELECTED",
@@ -24,14 +26,32 @@ export default class Segmentation extends React.Component {
     isFetching: false,
   }
 
-  state = {...this.defaultState}
+  state = {...Segmentation.defaultState}
+
+  componentDidMount () {
+    const savedAccessKey = getLocalStorageItem("access-key")
+    if (savedAccessKey) {
+      this.setState({ accessKey: savedAccessKey })
+    }
+  }
 
   reset = () => {
-    this.setState(this.defaultState)
+    const resetTo = {
+      ...Segmentation.defaultState,
+      accessKey: this.state.accessKey,
+    }
+    this.setState(resetTo)
   }
 
   handleChange = name => e => {
     this.setState({[name]: e.target.value})
+  }
+
+  handleAccessKeyChange = shouldPersistAccessKey => e => {
+    if (shouldPersistAccessKey) {
+      setLocalStorageItem("access-key", e.target.value)
+    }
+    this.handleChange("accessKey")(e)
   }
 
   handleDateRangeChange = dateRange => {
@@ -90,14 +110,18 @@ export default class Segmentation extends React.Component {
   }
 
   render () {
+    const { actions, settings } = this.props
+
     return (
       <Page>
         <div className="row">
           <div className="col-12">
-            <AccessKeyPanel
-              accessKeyValue={this.state.accessKey}
-              onChange={this.handleChange("accessKey")}
-            />
+              <AccessKeyPanel
+                togglePersistAccessKey={actions.togglePersistAccessKey}
+                persistAccessKey={settings.persistAccessKey}
+                accessKeyValue={this.state.accessKey}
+                onChange={this.handleAccessKeyChange(settings.persistAccessKey)}
+              />
           </div>
           <div className="col-8">
             <DateRangePanel
@@ -136,6 +160,12 @@ export default class Segmentation extends React.Component {
       </Page>
     )
   }
+}
+
+Segmentation.propTypes = {
+  settings: PropTypes.shape({
+    persistAccessKey: PropTypes.bool.isRequired,
+  })
 }
 
 const formatDate = (date) => {
