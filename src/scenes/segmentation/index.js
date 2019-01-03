@@ -36,7 +36,11 @@ export default class Segmentation extends React.Component {
   }
 
   reset = () => {
-    this.setState(this.defaultState)
+    const resetTo = {
+      ...Segmentation.defaultState,
+      accessKey: this.state.accessKey,
+    }
+    this.setState(resetTo)
   }
 
   handleChange = name => e => {
