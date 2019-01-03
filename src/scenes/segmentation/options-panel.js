@@ -1,14 +1,19 @@
 import React from "react"
+import styled from "styled-components"
 import {shape, func, string} from "prop-types"
 import {InputGroup, Label, Radio, RadioGroup} from "@blueprintjs/core"
 import Panel from "../../modules/common/panel"
+
+const OptionSection = styled.div`
+  margin-bottom: 15px;
+`
 
 const OptionsPanel = ({eventName, unit, property}) => (
   <Panel>
     <h4>Customise download</h4>
     <div className="container-fluid">
       <div className="row">
-        <div className="col-6">
+        <OptionSection className="col-6">
           <Label>Event name</Label>
           <InputGroup
             leftIcon="mobile-phone"
@@ -16,9 +21,19 @@ const OptionsPanel = ({eventName, unit, property}) => (
             value={eventName.value}
             onChange={eventName.onChange}
           />
-        </div>
+        </OptionSection>
 
-        <div className="col-3">
+        <OptionSection className="col-6">
+          <Label>Property name</Label>
+          <InputGroup
+            leftIcon="clean"
+            placeholder="e.g. Request Brand IDs"
+            value={property.value}
+            onChange={property.onChange}
+          />
+        </OptionSection>
+
+        <div className="col-12">
           <RadioGroup
             label="Group by"
             selectedValue={unit.value}
@@ -26,17 +41,6 @@ const OptionsPanel = ({eventName, unit, property}) => (
           >
             <Radio label="Hour" value="hour" />
             <Radio label="Day" value="day" />
-          </RadioGroup>
-        </div>
-
-        <div className="col-3">
-          <RadioGroup
-            label="Property name"
-            selectedValue={property.value}
-            onChange={property.onChange}
-          >
-            <Radio label="Mode ID" value="mode_id" />
-            <Radio label="Request Brand IDs" value="Request Brand IDs" />
           </RadioGroup>
         </div>
       </div>
