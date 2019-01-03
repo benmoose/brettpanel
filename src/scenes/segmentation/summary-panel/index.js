@@ -11,7 +11,7 @@ const VerticalPanel = styled(Panel)`
 `
 
 const SeparatorLine = styled(Divider)`
-  margin: 15px 0;
+  margin: 15px 0 !important;
 `
 
 const Buttons = ({ actions, isDisabled, isFetching }) => {
