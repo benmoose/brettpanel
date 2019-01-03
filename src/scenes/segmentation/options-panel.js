@@ -9,8 +9,7 @@ const OptionSection = styled.div`
 `
 
 const OptionsPanel = ({eventName, unit, property}) => (
-  <Panel>
-    <h4>Customise download</h4>
+  <Panel title="Download Options">
     <div className="container-fluid">
       <div className="row">
         <OptionSection className="col-6">

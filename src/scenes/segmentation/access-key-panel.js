@@ -8,7 +8,7 @@ const Toolbar = styled.div`
 `
 
 export default ({ togglePersistAccessKey, persistAccessKey, accessKeyValue, onChange }) => (
-  <Panel>
+  <Panel secondary>
     <div style={{display: "flex", alignItems: "baseline"}}>
       <Label>Access Key</Label>
       <small style={{marginLeft: "5px", opacity: 0.65}}>

@@ -2,13 +2,13 @@ import React from "react"
 import {DateRangePicker} from "@blueprintjs/datetime"
 import Panel from "../../modules/common/panel"
 
-export default ({startTime, endTime, onChange}) => (
-  <Panel>
-    <h4>Select date range</h4>
+export default ({startTime, endTime, onChange, maxDate}) => (
+  <Panel title="Select date range">
     <DateRangePicker
-      shortcuts
+      reverseMonthAndYearMenus
       value={[startTime, endTime]}
       onChange={onChange}
+      maxDate={maxDate}
     />
   </Panel>
 )
