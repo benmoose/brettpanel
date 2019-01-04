@@ -9,5 +9,5 @@ test("transformSegmentation", () => {
       "values": {}
     }
   }
-  expect(transformSegmentation(emptyData.data.series, emptyData.data.values)).toBe([])
+  expect(transformSegmentation(emptyData.data.series, emptyData.data.values)).toEqual([])
 })
