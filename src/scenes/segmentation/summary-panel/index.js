@@ -33,7 +33,7 @@ const Buttons = ({ actions, isDisabled, isFetching }) => {
 
 export default ({ isValid, isFetching, startTime, endTime, actions }) => {
   return (
-    <VerticalPanel secondary>
+    <VerticalPanel secondary title="Summary">
       <span>Downloading data for <strong>{getDateRangeDurationDays(startTime, endTime)}</strong> days</span>
       <SeparatorLine />
       <Buttons actions={actions} isDisabled={!isValid} isFetching={isFetching} />

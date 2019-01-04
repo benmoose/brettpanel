@@ -15,6 +15,8 @@ import SummaryPanel from "./summary-panel"
 
 import "@blueprintjs/datetime/lib/css/blueprint-datetime.css"
 
+const CURRENT_DATE = moment()
+
 export default class Segmentation extends React.Component {
   static defaultState = {
     accessKey: "",
@@ -77,18 +79,15 @@ export default class Segmentation extends React.Component {
 
     callSegmentationEndpoint(this.state.accessKey, fromDate, toDate, this.state.unit, to)
       .then(({ data }) => transformSegmentation(data.data["series"], data.data["values"]))
-      .then(downloadedData => {
+      .then(transformedData => {
         const filename = this.getDownloadFilename(type)
         switch (type) {
           case "csv":
-            const flattenedData = downloadedData.reduce((acc, bucket) => {
-              return [...acc, ...bucket]
-            }, [])
-            const csvString = objectToCSVString(flattenedData)
+            const csvString = objectToCSVString(transformedData)
             saveAs(stringToBlob(csvString), filename)
             break
           case "json":
-            const jsonString = objectToJSONString(downloadedData)
+            const jsonString = objectToJSONString(transformedData)
             saveAs(stringToBlob(jsonString), filename)
             break
           default:
@@ -128,6 +127,7 @@ export default class Segmentation extends React.Component {
               startTime={this.state.startTime}
               endTime={this.state.endTime}
               onChange={this.handleDateRangeChange}
+              maxDate={CURRENT_DATE.toDate()}
             />
             <OptionsPanel
               eventName={{
@@ -176,14 +176,16 @@ const getToExpression = (property) => {
   return `properties["${property}"]`
 }
 
-const transformSegmentation = (series, valuesByModeId) => {
-  return series.map((date) => {
-    return Object.keys(valuesByModeId).map(property_value => {
-      return {
+export const transformSegmentation = (series, valuesByModeId) => {
+  const transformedData = []
+  series.forEach(date => {
+    Object.keys(valuesByModeId).forEach(property_value => {
+      transformedData.push({
         date,
         property_value,
         sum: valuesByModeId[property_value][date],
-      }
+      })
     })
-  }, [])
+  })
+  return transformedData
 }
