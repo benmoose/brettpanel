@@ -10,6 +10,14 @@ Brettpanel is available as a Docker image. By default it runs on port 5000.
 $ docker run -p 5000:5000 --rm benmoose/brettpanel:latest
 ```
 
+The project is a standard React app, so running a local development server can be done with `npm start`.
+
+```sh
+$ git clone https://github.com/benmoose/brettpanel
+$ cd brettpanel
+$ npm install && npm start
+```
+
 ### Other options
 
 Options passed to `docker run benmoose/brettpanel` are passed directly to [Serve](https://github.com/zeit/serve).
