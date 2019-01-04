@@ -7,7 +7,7 @@ import {Page} from "../../modules/common/layout"
 import Toaster from "../../modules/common/toaster"
 import {getLocalStorageItem, setLocalStorageItem} from "../../utils/local-storage"
 import {callSegmentationEndpoint, getMixpanelResponseErrorMessage} from "../../utils/mixpanel-client"
-import {objectToCSVString, objectToJSONString, stringToBlob} from "../../utils/transform"
+import {arrayToCSVString, arrayToJSONString, stringToBlob} from "../../utils/transform"
 import AccessKeyPanel from "./access-key-panel"
 import DateRangePanel from "./date-range-panel"
 import OptionsPanel from "./options-panel"
@@ -83,11 +83,11 @@ export default class Segmentation extends React.Component {
         const filename = this.getDownloadFilename(type)
         switch (type) {
           case "csv":
-            const csvString = objectToCSVString(transformedData)
+            const csvString = arrayToCSVString(transformedData)
             saveAs(stringToBlob(csvString), filename)
             break
           case "json":
-            const jsonString = objectToJSONString(transformedData)
+            const jsonString = arrayToJSONString(transformedData)
             saveAs(stringToBlob(jsonString), filename)
             break
           default:

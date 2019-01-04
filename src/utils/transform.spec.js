@@ -1,4 +1,4 @@
-import {objectToCSVString, objectToJSONString} from "./transform"
+import {arrayToCSVString, arrayToJSONString} from "./transform"
 
 const data = [
   {a: 42, b: "foo"},
@@ -7,9 +7,9 @@ const data = [
 ]
 
 test("CSV transformation returns correct data", () => {
-  expect(objectToCSVString(data)).toBe("a,b\n42,foo\n64,bar\n89,baz")
+  expect(arrayToCSVString(data)).toBe("a,b\n42,foo\n64,bar\n89,baz")
 })
 
 test("JSON transformation returns correct data", () => {
-  expect(objectToJSONString(data)).toBe(JSON.stringify(data))
+  expect(arrayToJSONString(data)).toBe(JSON.stringify(data))
 })

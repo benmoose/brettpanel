@@ -1,8 +1,8 @@
-export const objectToJSONString = (data) => {
+export const arrayToJSONString = (data) => {
   return JSON.stringify(data)
 }
 
-export const objectToCSVString = (data) => {
+export const arrayToCSVString = (data) => {
   const csvHeaders = Object.keys(data[0]).join(",")
   const csvData = data.map(rowObject => Object.values(rowObject).join(","))
   return [csvHeaders, ...csvData].join("\n")
